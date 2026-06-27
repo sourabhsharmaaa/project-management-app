@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  boardMembers  BoardMember[]
+  assignedCards Card[]
+}
+
+model Board {
+  id        Int      @id @default(autoincrement())
+  name      String
+  privacy   String   @default("PUBLIC")
+  url       String?  @unique
+  createdAt DateTime @default(now())
+
+  members BoardMember[]
+  lists   BoardList[]
+}
+
+model BoardMember {
+  id      Int @id @default(autoincrement())
+  userId  Int
+  boardId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, boardId])
+}
+
+model BoardList {
+  id        Int      @id @default(autoincrement())
+  name      String
+  boardId   Int
+  createdAt DateTime @default(now())
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
+}
+
+model Card {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  boardListId    Int
+  assignedUserId Int?
+  createdAt      DateTime @default(now())
+
+  boardList    BoardList @relation(fields: [boardListId], references: [id], onDelete: Cascade)
+  assignedUser User?     @relation(fields: [assignedUserId], references: [id])
+}

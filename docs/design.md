@@ -1,0 +1,183 @@
+# Project Management App — Design Document
+
+## Overview
+
+A REST API backend for a Trello-like project management application. The system supports 4 core resources: Users, Boards, BoardLists, and Cards — with relationships and business rules that mirror real-world project management workflows.
+
+---
+
+## Tech Stack
+
+| Technology | Purpose | Why I chose it |
+|-----------|---------|----------------|
+| Node.js + Express | Web server | Lightweight, fast to build REST APIs |
+| Prisma ORM | Database access | Type-safe queries, automatic cascade deletes, clean schema definition |
+| PostgreSQL | Database | Relational — fits perfectly since all 4 resources are related to each other |
+
+---
+
+## Database Design
+
+### Entity Relationship
+
+```
+User ─────────────── BoardMember ─────────────── Board
+                                                    │
+                                               BoardList
+                                                    │
+                                                  Card ──── User (assigned)
+```
+
+### Tables
+
+**User**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int | Primary key, auto-increment |
+| name | String | Required |
+| email | String | Required, unique |
+| createdAt | DateTime | Auto-generated |
+
+**Board**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int | Primary key, auto-increment |
+| name | String | Required |
+| privacy | String | "PUBLIC" or "PRIVATE", defaults to "PUBLIC" |
+| url | String | Auto-generated as `/boards/:id` after creation |
+| createdAt | DateTime | Auto-generated |
+
+**BoardMember** (join table)
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int | Primary key |
+| userId | Int | Foreign key → User |
+| boardId | Int | Foreign key → Board (cascade delete) |
+
+Unique constraint on `(userId, boardId)` — a user cannot be added to the same board twice.
+
+**BoardList**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int | Primary key, auto-increment |
+| name | String | Required |
+| boardId | Int | Foreign key → Board (cascade delete) |
+| createdAt | DateTime | Auto-generated |
+
+**Card**
+| Column | Type | Notes |
+|--------|------|-------|
+| id | Int | Primary key, auto-increment |
+| name | String | Required |
+| description | String | Optional |
+| boardListId | Int | Foreign key → BoardList (cascade delete) |
+| assignedUserId | Int? | Foreign key → User, nullable, defaults to null |
+| createdAt | DateTime | Auto-generated |
+
+### Cascade Deletes
+
+Handled at the database level via Prisma schema:
+- Delete Board → automatically deletes all its BoardLists and Cards
+- Delete BoardList → automatically deletes all its Cards
+
+This means the application code only needs to issue a single delete — the database handles the rest in the correct order.
+
+---
+
+## API Design
+
+### Base URL
+`http://localhost:3000`
+
+### Endpoints
+
+**Users**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/users` | Create a user |
+| GET | `/users` | Get all users |
+
+**Boards**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/boards` | Create a board |
+| GET | `/boards` | Get all boards |
+| GET | `/boards/:id` | Get one board with lists and cards |
+| PUT | `/boards/:id` | Update board |
+| DELETE | `/boards/:id` | Delete board (cascades) |
+| POST | `/boards/:id/members` | Add user to board |
+
+**BoardLists**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/boards/:boardId/lists` | Create a list inside a board |
+| GET | `/lists/:id` | Get one list with cards |
+| PUT | `/lists/:id` | Update list |
+| DELETE | `/lists/:id` | Delete list (cascades) |
+
+**Cards**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/lists/:listId/cards` | Create a card inside a list |
+| GET | `/cards/:id` | Get one card |
+| PUT | `/cards/:id` | Update card |
+| DELETE | `/cards/:id` | Delete card |
+| PUT | `/cards/:id/assign` | Assign user to card |
+| PUT | `/cards/:id/unassign` | Unassign user from card |
+| PUT | `/cards/:id/move` | Move card to another list |
+
+---
+
+## Project Structure
+
+```
+src/
+  app.js              — Express setup, middleware, all route mounting
+  index.js            — Starts the HTTP server
+  lib/
+    prisma.js         — Single shared Prisma client instance
+  modules/
+    users/
+      users.routes.js
+      users.controller.js
+    boards/
+      boards.routes.js
+      boards.controller.js
+    lists/
+      lists.routes.js
+      lists.controller.js
+    cards/
+      cards.routes.js
+      cards.controller.js
+prisma/
+  schema.prisma       — Database schema
+docs/
+  api.md              — API reference
+  design.md           — This document
+```
+
+Each module is self-contained with its own routes and controller. If you want to find anything related to boards, you go to the boards folder — nothing else to look at.
+
+---
+
+## Key Business Rules
+
+1. **Board privacy** defaults to `"PUBLIC"` if not provided
+2. **Board URL** is auto-generated as `/boards/:id` after creation (requires two DB calls — create then update)
+3. **Cards are unassigned** by default (`assignedUserId: null`)
+4. **Assigning a user to a card** requires that user to be a member of the board first — enforced in the controller
+5. **Moving a card** is only allowed within the same board — validated by comparing `boardId` of source and target lists
+6. **Cascade deletes** are handled at the schema level, not in application code
+
+---
+
+## Design Decisions
+
+**Why Prisma over raw SQL?**
+Prisma prevents SQL injection by default, handles cascade deletes automatically, and makes relational queries much cleaner. Fetching a board with all its lists and cards is one query with `include` instead of three separate SQL queries that need to be manually stitched together.
+
+**Why modular folder structure?**
+Each resource is completely isolated. Routes only define URLs, controllers only contain logic. Adding a new feature to boards means touching only the boards folder — nothing else in the codebase needs to change.
+
+**Why no authentication?**
+The assignment focuses on the core domain logic. Authentication would be the natural next layer — a JWT middleware added to `app.js` that validates a token before reaching any route handler.
