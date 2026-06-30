@@ -25,7 +25,10 @@ const createBoard = async (req, res) => {
 
 const getAllBoards = async (req, res) => {
   const boards = await prisma.board.findMany({
-    include: { members: { include: { user: true } } }
+    include: {
+      members: { include: { user: true } },
+      lists: { include: { cards: true } }
+    }
   })
   res.json(boards)
 }
