@@ -50,7 +50,7 @@ Errors: `400` name missing | `400` invalid privacy value
 ### Get All Boards
 **GET** `/boards`
 
-Response (200): Array of boards, each with their members included.
+Response (200): Array of boards, each with members, lists, and cards nested inside.
 
 ---
 
