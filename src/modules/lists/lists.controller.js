@@ -1,85 +1,41 @@
-const prisma = require('../../lib/prisma')
+const listsService = require('./lists.service')
 
 const createList = async (req, res) => {
-  const { boardId } = req.params
-  const { name } = req.body
-
-  if (!name) {
-    return res.status(400).json({ error: 'name is required' })
-  }
-
   try {
-    const board = await prisma.board.findUnique({ where: { id: parseInt(boardId) } })
-    if (!board) {
-      return res.status(404).json({ error: 'Board not found' })
-    }
-
-    const list = await prisma.boardList.create({
-      data: { name, boardId: parseInt(boardId) }
-    })
-
+    const list = await listsService.createList(parseInt(req.params.boardId), req.body.name)
     res.status(201).json(list)
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 const getOneList = async (req, res) => {
-  const { id } = req.params
-
   try {
-    const list = await prisma.boardList.findUnique({
-      where: { id: parseInt(id) },
-      include: { cards: true }
-    })
-
-    if (!list) {
-      return res.status(404).json({ error: 'List not found' })
-    }
-
+    const list = await listsService.getOneList(parseInt(req.params.id))
     res.json(list)
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 const updateList = async (req, res) => {
-  const { id } = req.params
-  const { name } = req.body
-
-  if (!name) {
-    return res.status(400).json({ error: 'name is required' })
-  }
-
   try {
-    const list = await prisma.boardList.findUnique({ where: { id: parseInt(id) } })
-    if (!list) {
-      return res.status(404).json({ error: 'List not found' })
-    }
-
-    const updated = await prisma.boardList.update({
-      where: { id: parseInt(id) },
-      data: { name }
-    })
-
-    res.json(updated)
+    const list = await listsService.updateList(parseInt(req.params.id), req.body.name)
+    res.json(list)
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 const deleteList = async (req, res) => {
-  const { id } = req.params
-
   try {
-    const list = await prisma.boardList.findUnique({ where: { id: parseInt(id) } })
-    if (!list) {
-      return res.status(404).json({ error: 'List not found' })
-    }
-
-    await prisma.boardList.delete({ where: { id: parseInt(id) } })
+    await listsService.deleteList(parseInt(req.params.id))
     res.json({ message: 'List deleted' })
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
   }
 }
