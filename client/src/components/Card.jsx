@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { updateCard, moveCard, reorderCard, assignUser, unassignUser } from '../api'
+import { updateCard, moveCard, reorderCard, assignUser, unassignUser, deleteCard } from '../api'
 
 export default function Card({ card, lists, boardMembers, onUpdate }) {
   const [editing, setEditing] = useState(false)
@@ -42,6 +42,15 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
       }
     } catch (err) {
       console.error('Failed to assign user', err)
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      await deleteCard(card.id)
+      onUpdate()
+    } catch (err) {
+      console.error('Failed to delete card', err)
     }
   }
 
@@ -93,7 +102,7 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
             </button>
             <select onChange={handleAssign} defaultValue="" style={{ fontSize: 12 }}>
               <option value="">Assign user…</option>
-              <option value="0">Unassign</option>
+              {card.assignedUserId && <option value="0">Unassign</option>}
               {boardMembers.map(m => (
                 <option key={m.userId} value={m.userId}>{m.user.name}</option>
               ))}
@@ -106,6 +115,9 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
             </select>
             <button className="secondary" style={{ fontSize: 12 }} onClick={handleReorderUp}>
               Move to top
+            </button>
+            <button className="danger" style={{ fontSize: 12 }} onClick={handleDelete}>
+              Delete
             </button>
           </div>
         </>

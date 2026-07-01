@@ -1,11 +1,20 @@
 import { useState } from 'react'
-import { createCard } from '../api'
+import { createCard, deleteList } from '../api'
 import CardComponent from './Card'
 
 export default function List({ list, lists, boardMembers, onBoardRefresh }) {
   const [cardName, setCardName] = useState('')
   const [cardDesc, setCardDesc] = useState('')
   const [showForm, setShowForm] = useState(false)
+
+  const handleDeleteList = async () => {
+    try {
+      await deleteList(list.id)
+      onBoardRefresh()
+    } catch (err) {
+      console.error('Failed to delete list', err)
+    }
+  }
 
   const handleCreateCard = async (e) => {
     e.preventDefault()
@@ -25,7 +34,10 @@ export default function List({ list, lists, boardMembers, onBoardRefresh }) {
       maxWidth: 280,
       flexShrink: 0
     }}>
-      <h3 style={{ marginBottom: 12, fontSize: 15 }}>{list.name}</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <h3 style={{ fontSize: 15 }}>{list.name}</h3>
+        <button className="danger" onClick={handleDeleteList} style={{ fontSize: 11, padding: '3px 8px' }}>Delete</button>
+      </div>
 
       {list.cards.map(card => (
         <CardComponent

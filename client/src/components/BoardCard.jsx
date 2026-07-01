@@ -1,7 +1,19 @@
 import { useNavigate } from 'react-router-dom'
+import { deleteBoard } from '../api'
 
-export default function BoardCard({ board }) {
+export default function BoardCard({ board, onDelete }) {
   const navigate = useNavigate()
+
+  const handleDelete = async (e) => {
+    e.stopPropagation()
+    try {
+      await deleteBoard(board.id)
+      onDelete(board.id)
+    } catch (err) {
+      console.error('Failed to delete board', err)
+    }
+  }
+
   return (
     <div
       onClick={() => navigate(`/boards/${board.id}`)}
@@ -14,7 +26,8 @@ export default function BoardCard({ board }) {
         minHeight: 100,
         display: 'flex',
         flexDirection: 'column',
-        gap: 8
+        gap: 8,
+        position: 'relative'
       }}
     >
       <strong style={{ fontSize: 16 }}>{board.name}</strong>
@@ -22,6 +35,13 @@ export default function BoardCard({ board }) {
       <span style={{ fontSize: 12, color: '#666' }}>
         {board.lists?.length ?? 0} lists · {board.members?.length ?? 0} members
       </span>
+      <button
+        className="danger"
+        onClick={handleDelete}
+        style={{ fontSize: 12, marginTop: 4, alignSelf: 'flex-start' }}
+      >
+        Delete
+      </button>
     </div>
   )
 }

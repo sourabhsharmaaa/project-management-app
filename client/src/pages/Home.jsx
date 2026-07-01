@@ -46,7 +46,13 @@ export default function Home() {
       {error && <p style={{ color: 'red', marginBottom: 16 }}>{error}</p>}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-        {boards.map(b => <BoardCard key={b.id} board={b} />)}
+        {boards.map(b => (
+          <BoardCard
+            key={b.id}
+            board={b}
+            onDelete={(id) => setBoards(boards.filter(x => x.id !== id))}
+          />
+        ))}
       </div>
     </div>
   )
