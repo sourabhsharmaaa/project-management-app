@@ -16,22 +16,30 @@ export default function Board() {
 
   useEffect(() => {
     refresh()
-    getUsers().then(setUsers)
+    getUsers().then(setUsers).catch(console.error)
   }, [id])
 
   const handleCreateList = async (e) => {
     e.preventDefault()
-    await createList(id, { name: listName })
-    setListName('')
-    refresh()
+    try {
+      await createList(id, { name: listName })
+      setListName('')
+      refresh()
+    } catch (err) {
+      console.error('Failed to create list', err)
+    }
   }
 
   const handleAddMember = async (e) => {
     e.preventDefault()
-    await addMember(id, { userId: parseInt(selectedUserId) })
-    setSelectedUserId('')
-    setShowMemberForm(false)
-    refresh()
+    try {
+      await addMember(id, { userId: parseInt(selectedUserId) })
+      setSelectedUserId('')
+      setShowMemberForm(false)
+      refresh()
+    } catch (err) {
+      console.error('Failed to add member', err)
+    }
   }
 
   if (!board) return <div style={{ padding: 32 }}>Loading…</div>

@@ -59,7 +59,9 @@ const moveCard = async (id, targetListId) => {
   if (targetList.boardId !== card.boardList.boardId) {
     throw { status: 400, message: 'Cannot move card to a list in a different board' }
   }
-  return cardsRepository.update(id, { boardListId: targetListId })
+  const last = await cardsRepository.findLastInList(targetListId)
+  const newPosition = last ? last.position + 1 : 1.0
+  return cardsRepository.update(id, { boardListId: targetListId, position: newPosition })
 }
 
 const reorderCard = async (id, afterCardId) => {

@@ -7,33 +7,51 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
   const [description, setDescription] = useState(card.description || '')
 
   const handleSave = async () => {
-    const updated = await updateCard(card.id, { name, description })
-    onUpdate(updated)
-    setEditing(false)
+    try {
+      const updated = await updateCard(card.id, { name, description })
+      onUpdate(updated)
+      setEditing(false)
+    } catch (err) {
+      console.error('Failed to save card', err)
+    }
   }
 
   const handleMove = async (e) => {
     const targetListId = parseInt(e.target.value)
     if (!targetListId) return
-    const updated = await moveCard(card.id, { targetListId })
-    onUpdate(updated)
-    e.target.value = ''
+    try {
+      const updated = await moveCard(card.id, { targetListId })
+      onUpdate(updated)
+      e.target.value = ''
+    } catch (err) {
+      console.error('Failed to move card', err)
+      e.target.value = ''
+    }
   }
 
   const handleAssign = async (e) => {
+    if (e.target.value === '') return
     const userId = parseInt(e.target.value)
-    if (!userId) {
-      const updated = await unassignUser(card.id)
-      onUpdate(updated)
-    } else {
-      const updated = await assignUser(card.id, { userId })
-      onUpdate(updated)
+    try {
+      if (!userId) {
+        const updated = await unassignUser(card.id)
+        onUpdate(updated)
+      } else {
+        const updated = await assignUser(card.id, { userId })
+        onUpdate(updated)
+      }
+    } catch (err) {
+      console.error('Failed to assign user', err)
     }
   }
 
   const handleReorderUp = async () => {
-    await reorderCard(card.id, { afterCardId: null })
-    onUpdate()
+    try {
+      await reorderCard(card.id, { afterCardId: null })
+      onUpdate()
+    } catch (err) {
+      console.error('Failed to reorder card', err)
+    }
   }
 
   return (
