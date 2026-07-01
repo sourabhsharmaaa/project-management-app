@@ -246,3 +246,19 @@ The target list must be in the same board as the card's current list.
 Response (200): Updated card with new `boardListId`.
 
 Errors: `400` targetListId missing | `404` card not found | `404` target list not found | `400` target list is in a different board
+
+---
+
+### Reorder a Card Within Its List
+**PUT** `/cards/:id/reorder`
+
+Request body:
+```json
+{ "afterCardId": 3 }
+```
+- `afterCardId: null` — move the card to the top of the list
+- `afterCardId: <id>` — place the card immediately after the card with that id
+
+Response (200): Updated card object with new `position` value.
+
+Errors: `404` card not found | `404` reference card not found | `400` reference card is not in the same list
