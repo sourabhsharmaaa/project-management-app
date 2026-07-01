@@ -1,28 +1,18 @@
-const prisma = require('../../lib/prisma')
+const usersService = require('./users.service')
 
 const createUser = async (req, res) => {
-  const { name, email } = req.body
-
-  if (!name || !email) {
-    return res.status(400).json({ error: 'name and email are required' })
-  }
-
   try {
-    const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) {
-      return res.status(409).json({ error: 'email already in use' })
-    }
-
-    const user = await prisma.user.create({ data: { name, email } })
+    const user = await usersService.createUser(req.body.name, req.body.email)
     res.status(201).json(user)
   } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await prisma.user.findMany()
+    const users = await usersService.getAllUsers()
     res.json(users)
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' })
