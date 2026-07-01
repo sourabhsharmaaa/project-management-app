@@ -55,7 +55,7 @@ model Card {
   description    String?
   boardListId    Int
   assignedUserId Int?
-  position       Int      @default(0)
+  position       Float    @default(0)
   createdAt      DateTime @default(now())
 
   boardList    BoardList @relation(fields: [boardListId], references: [id], onDelete: Cascade)
