@@ -6,14 +6,14 @@ const findById = (id) => prisma.board.findUnique({ where: { id } })
 const findAll = () => prisma.board.findMany({
   include: {
     members: { include: { user: true } },
-    lists: { include: { cards: true } }
+    lists: { include: { cards: { orderBy: { position: 'asc' } } } }
   }
 })
 const findByIdWithDetails = (id) => prisma.board.findUnique({
   where: { id },
   include: {
     members: { include: { user: true } },
-    lists: { include: { cards: true } }
+    lists: { include: { cards: { orderBy: { position: 'asc' } } } }
   }
 })
 const remove = (id) => prisma.board.delete({ where: { id } })
