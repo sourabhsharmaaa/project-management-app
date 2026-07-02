@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { getBoard, createList, addMember, getUsers, moveCard, reorderCard } from '../api'
 import List from '../components/List'
 import styles from './Board.module.css'
@@ -13,6 +13,7 @@ export default function Board() {
   const [users, setUsers] = useState([])
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState('')
+  const [activeCard, setActiveCard] = useState(null)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
@@ -46,11 +47,17 @@ export default function Board() {
     }
   }
 
+  const handleDragStart = ({ active }) => {
+    const card = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
+    setActiveCard(card || null)
+  }
+
   const handleDragEnd = async ({ active, over }) => {
+    setActiveCard(null)
     if (!over || active.id === over.id) return
 
-    const activeCard = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
-    if (!activeCard) return
+    const draggedCard = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
+    if (!draggedCard) return
 
     const overListId = String(over.id).startsWith('list-')
       ? parseInt(String(over.id).replace('list-', ''))
@@ -58,11 +65,11 @@ export default function Board() {
 
     if (!overListId) return
 
-    if (activeCard.boardListId !== overListId) {
-      await moveCard(activeCard.id, { targetListId: overListId })
+    if (draggedCard.boardListId !== overListId) {
+      await moveCard(draggedCard.id, { targetListId: overListId })
     } else {
       const afterCardId = String(over.id).startsWith('list-') ? null : over.id
-      await reorderCard(activeCard.id, { afterCardId })
+      await reorderCard(draggedCard.id, { afterCardId })
     }
     refresh()
   }
@@ -78,7 +85,7 @@ export default function Board() {
       </div>
 
       <div className={styles.toolbar}>
-        <form onSubmit={handleCreateList} style={{ display: 'flex', gap: 8 }}>
+        <form onSubmit={handleCreateList} className={styles.inlineForm}>
           <input
             placeholder="New list name"
             value={listName}
@@ -90,7 +97,7 @@ export default function Board() {
         </form>
 
         {showMemberForm ? (
-          <form onSubmit={handleAddMember} style={{ display: 'flex', gap: 8 }}>
+          <form onSubmit={handleAddMember} className={styles.inlineForm}>
             <select
               value={selectedUserId}
               onChange={e => setSelectedUserId(e.target.value)}
@@ -110,7 +117,7 @@ export default function Board() {
         )}
       </div>
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className={styles.listsContainer}>
           {board.lists.map(list => (
             <List
@@ -121,6 +128,16 @@ export default function Board() {
             />
           ))}
         </div>
+        <DragOverlay>
+          {activeCard ? (
+            <div className={styles.dragOverlayCard}>
+              <div>{activeCard.name}</div>
+              {activeCard.description && (
+                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{activeCard.description}</div>
+              )}
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </div>
   )
