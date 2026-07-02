@@ -70,12 +70,9 @@ export default function Card({ card, boardMembers, onCardUpdate, onCardDelete })
           {card.description && (
             <div className={styles.description}>{card.description}</div>
           )}
-          {card.assignedUser && (
-            <div className={styles.assignedUser}>Assigned: {card.assignedUser.name}</div>
-          )}
           <div className={styles.actions}>
             <button className={`secondary ${styles.actionBtn}`} onClick={() => setEditing(true)}>Edit</button>
-            <select onChange={handleAssign} defaultValue="" className={styles.actionBtn}>
+            <select onChange={handleAssign} value={card.assignedUserId || ''} className={styles.actionBtn}>
               <option value="">Assign user…</option>
               {card.assignedUserId && <option value="0">Unassign</option>}
               {boardMembers.map(m => (
