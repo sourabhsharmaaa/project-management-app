@@ -1,12 +1,18 @@
-# Project Management API
+# Project Management App
 
-A Trello-like project management backend built with Node.js, Express, Prisma ORM, and PostgreSQL.
+A Trello-like project management application with a React frontend and a Node.js REST API backend.
 
 ## Tech Stack
 
+**Backend**
 - **Node.js** + **Express 5** — web server and routing
 - **Prisma ORM** — database access with type safety and cascade deletes
 - **PostgreSQL** — relational database
+
+**Frontend**
+- **React 19** — UI components
+- **React Router v7** — client-side routing
+- **Vite** — dev server and bundler
 
 ## Prerequisites
 
@@ -15,7 +21,9 @@ A Trello-like project management backend built with Node.js, Express, Prisma ORM
 
 ## Setup
 
-1. Install dependencies:
+### Backend
+
+1. Install backend dependencies:
    ```bash
    npm install
    ```
@@ -39,18 +47,31 @@ A Trello-like project management backend built with Node.js, Express, Prisma ORM
    npx prisma generate
    ```
 
-5. Create tables (run this SQL via psql):
+5. Run migrations:
    ```bash
    npx prisma db push
    ```
 
+### Frontend
+
+6. Install frontend dependencies:
+   ```bash
+   cd frontend && npm install
+   ```
+
 ## Running the App
 
+**Backend** (from project root):
 ```bash
 npm run dev
 ```
-
 Server starts at `http://localhost:3000`
+
+**Frontend** (from `frontend/`):
+```bash
+npm run dev
+```
+App opens at `http://localhost:5173`
 
 Health check: GET `http://localhost:3000/health`
 

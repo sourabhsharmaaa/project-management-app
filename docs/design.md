@@ -2,17 +2,20 @@
 
 ## Overview
 
-A REST API backend for a Trello-like project management application. The system supports 4 core resources: Users, Boards, BoardLists, and Cards — with relationships and business rules that mirror real-world project management workflows.
+A full-stack Trello-like project management application. The backend is a REST API supporting 4 core resources — Users, Boards, BoardLists, and Cards — with relationships and business rules that mirror real-world project management workflows. The frontend is a React SPA that lets users create boards, manage lists and cards, assign members, and drag cards between lists.
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose | Why I chose it |
-|-----------|---------|----------------|
-| Node.js + Express | Web server | Lightweight, fast to build REST APIs |
-| Prisma ORM | Database access | Type-safe queries, automatic cascade deletes, clean schema definition |
-| PostgreSQL | Database | Relational — fits perfectly since all 4 resources are related to each other |
+| Technology | Layer | Purpose | Why I chose it |
+|-----------|-------|---------|----------------|
+| Node.js + Express 5 | Backend | Web server and routing | Lightweight, fast to build REST APIs |
+| Prisma ORM | Backend | Database access | Type-safe queries, automatic cascade deletes, clean schema definition |
+| PostgreSQL | Backend | Database | Relational — fits perfectly since all 4 resources are related to each other |
+| React 19 | Frontend | UI components | Component model maps naturally to boards, lists, and cards |
+| React Router v7 | Frontend | Client-side routing | Declarative routing between Home and Board pages |
+| Vite | Frontend | Dev server and bundler | Fast HMR, zero config for React projects |
 
 ---
 
