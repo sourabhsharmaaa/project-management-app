@@ -10,16 +10,6 @@ const createCard = async (req, res) => {
   }
 }
 
-const getOneCard = async (req, res) => {
-  try {
-    const card = await cardsService.getOneCard(parseInt(req.params.id))
-    res.json(card)
-  } catch (err) {
-    if (err.status) return res.status(err.status).json({ error: err.message })
-    res.status(500).json({ error: 'Internal server error' })
-  }
-}
-
 const updateCard = async (req, res) => {
   try {
     const card = await cardsService.updateCard(parseInt(req.params.id), req.body.name, req.body.description)
@@ -81,4 +71,4 @@ const reorderCard = async (req, res) => {
   }
 }
 
-module.exports = { createCard, getOneCard, updateCard, deleteCard, assignUser, unassignUser, moveCard, reorderCard }
+module.exports = { createCard, updateCard, deleteCard, assignUser, unassignUser, moveCard, reorderCard }

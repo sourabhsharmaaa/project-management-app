@@ -12,12 +12,6 @@ const createCard = async (listId, name, description) => {
   return cardsRepository.create({ name, description: description || null, boardListId: listId, position })
 }
 
-const getOneCard = async (id) => {
-  const card = await cardsRepository.findByIdWithDetails(id)
-  if (!card) throw { status: 404, message: 'Card not found' }
-  return card
-}
-
 const updateCard = async (id, name, description) => {
   const card = await cardsRepository.findById(id)
   if (!card) throw { status: 404, message: 'Card not found' }
@@ -86,4 +80,4 @@ const reorderCard = async (id, afterCardId) => {
   return cardsRepository.update(id, { position: newPosition })
 }
 
-module.exports = { createCard, getOneCard, updateCard, deleteCard, assignUser, unassignUser, moveCard, reorderCard }
+module.exports = { createCard, updateCard, deleteCard, assignUser, unassignUser, moveCard, reorderCard }

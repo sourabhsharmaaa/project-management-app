@@ -10,16 +10,6 @@ const createList = async (req, res) => {
   }
 }
 
-const getOneList = async (req, res) => {
-  try {
-    const list = await listsService.getOneList(parseInt(req.params.id))
-    res.json(list)
-  } catch (err) {
-    if (err.status) return res.status(err.status).json({ error: err.message })
-    res.status(500).json({ error: 'Internal server error' })
-  }
-}
-
 const updateList = async (req, res) => {
   try {
     const list = await listsService.updateList(parseInt(req.params.id), req.body.name)
@@ -40,4 +30,4 @@ const deleteList = async (req, res) => {
   }
 }
 
-module.exports = { createList, getOneList, updateList, deleteList }
+module.exports = { createList, updateList, deleteList }

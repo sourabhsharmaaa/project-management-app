@@ -2,10 +2,6 @@ const prisma = require('../../lib/prisma')
 
 const create = (data) => prisma.card.create({ data })
 const findById = (id) => prisma.card.findUnique({ where: { id } })
-const findByIdWithDetails = (id) => prisma.card.findUnique({
-  where: { id },
-  include: { assignedUser: true, boardList: true }
-})
 const findByIdWithList = (id) => prisma.card.findUnique({
   where: { id },
   include: { boardList: true }
@@ -31,7 +27,7 @@ const findNextAfterPosition = (boardListId, position, excludeId) => prisma.card.
 })
 
 module.exports = {
-  create, findById, findByIdWithDetails, findByIdWithList,
+  create, findById, findByIdWithList,
   update, updateWithUser, remove,
   findLastInList, findFirstInList, findNextAfterPosition
 }
