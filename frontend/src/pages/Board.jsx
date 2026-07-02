@@ -68,11 +68,23 @@ export default function Board() {
 
     if (draggedCard.boardListId !== overListId) {
       await moveCard(draggedCard.id, { targetListId: overListId })
+      refresh()
     } else {
       const afterCardId = isOverList ? null : Number(over.id)
-      await reorderCard(draggedCard.id, { afterCardId })
+      const updated = await reorderCard(draggedCard.id, { afterCardId })
+      setBoard(prev => ({
+        ...prev,
+        lists: prev.lists.map(l => {
+          if (l.id !== overListId) return l
+          return {
+            ...l,
+            cards: l.cards
+              .map(c => c.id === updated.id ? updated : c)
+              .sort((a, b) => a.position - b.position)
+          }
+        })
+      }))
     }
-    refresh()
   }
 
   if (!board) return <div className={styles.container}>Loading…</div>
