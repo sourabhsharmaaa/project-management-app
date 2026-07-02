@@ -5,7 +5,7 @@ import styles from './BoardCard.module.css'
 export default function BoardCard({ board, onDelete }) {
   const navigate = useNavigate()
 
-  const handleDelete = async (e) => {
+  const handleDeleteBoard = async (e) => {
     e.stopPropagation()
     try {
       await deleteBoard(board.id)
@@ -22,7 +22,7 @@ export default function BoardCard({ board, onDelete }) {
       <span className={styles.meta}>
         {board.lists?.length ?? 0} lists · {board.members?.length ?? 0} members
       </span>
-      <button className={`danger ${styles.deleteBtn}`} onClick={handleDelete}>
+      <button className={`danger ${styles.deleteBtn}`} onClick={handleDeleteBoard}>
         Delete
       </button>
     </div>

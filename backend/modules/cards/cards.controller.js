@@ -2,8 +2,9 @@ const cardsService = require('./cards.service')
 
 const createCard = async (req, res) => {
   try {
-    const card = await cardsService.createCard(parseInt(req.params.listId), req.body.name, req.body.description)
-    res.status(201).json(card)
+    const listId = parseInt(req.params.listId)
+    const newCard = await cardsService.createCard(listId, req.body.name, req.body.description)
+    res.status(201).json(newCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -12,8 +13,9 @@ const createCard = async (req, res) => {
 
 const updateCard = async (req, res) => {
   try {
-    const card = await cardsService.updateCard(parseInt(req.params.id), req.body.name, req.body.description)
-    res.json(card)
+    const cardId = parseInt(req.params.id)
+    const updatedCard = await cardsService.updateCard(cardId, req.body.name, req.body.description)
+    res.json(updatedCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -22,7 +24,8 @@ const updateCard = async (req, res) => {
 
 const deleteCard = async (req, res) => {
   try {
-    await cardsService.deleteCard(parseInt(req.params.id))
+    const cardId = parseInt(req.params.id)
+    await cardsService.deleteCard(cardId)
     res.json({ message: 'Card deleted' })
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
@@ -32,8 +35,10 @@ const deleteCard = async (req, res) => {
 
 const assignUser = async (req, res) => {
   try {
-    const card = await cardsService.assignUser(parseInt(req.params.id), parseInt(req.body.userId))
-    res.json(card)
+    const cardId = parseInt(req.params.id)
+    const userId = parseInt(req.body.userId)
+    const updatedCard = await cardsService.assignUser(cardId, userId)
+    res.json(updatedCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -42,8 +47,9 @@ const assignUser = async (req, res) => {
 
 const unassignUser = async (req, res) => {
   try {
-    const card = await cardsService.unassignUser(parseInt(req.params.id))
-    res.json(card)
+    const cardId = parseInt(req.params.id)
+    const updatedCard = await cardsService.unassignUser(cardId)
+    res.json(updatedCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -52,8 +58,10 @@ const unassignUser = async (req, res) => {
 
 const moveCard = async (req, res) => {
   try {
-    const card = await cardsService.moveCard(parseInt(req.params.id), parseInt(req.body.targetListId))
-    res.json(card)
+    const cardId = parseInt(req.params.id)
+    const targetListId = parseInt(req.body.targetListId)
+    const updatedCard = await cardsService.moveCard(cardId, targetListId)
+    res.json(updatedCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -62,9 +70,10 @@ const moveCard = async (req, res) => {
 
 const reorderCard = async (req, res) => {
   try {
+    const cardId = parseInt(req.params.id)
     const afterCardId = req.body.afterCardId !== undefined ? req.body.afterCardId : null
-    const card = await cardsService.reorderCard(parseInt(req.params.id), afterCardId)
-    res.json(card)
+    const updatedCard = await cardsService.reorderCard(cardId, afterCardId)
+    res.json(updatedCard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })

@@ -2,8 +2,8 @@ const boardsService = require('./boards.service')
 
 const createBoard = async (req, res) => {
   try {
-    const board = await boardsService.createBoard(req.body.name, req.body.privacy)
-    res.status(201).json(board)
+    const newBoard = await boardsService.createBoard(req.body.name, req.body.privacy)
+    res.status(201).json(newBoard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -21,7 +21,8 @@ const getAllBoards = async (req, res) => {
 
 const getOneBoard = async (req, res) => {
   try {
-    const board = await boardsService.getOneBoard(parseInt(req.params.id))
+    const boardId = parseInt(req.params.id)
+    const board = await boardsService.getOneBoard(boardId)
     res.json(board)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
@@ -31,8 +32,9 @@ const getOneBoard = async (req, res) => {
 
 const updateBoard = async (req, res) => {
   try {
-    const board = await boardsService.updateBoard(parseInt(req.params.id), req.body.name, req.body.privacy)
-    res.json(board)
+    const boardId = parseInt(req.params.id)
+    const updatedBoard = await boardsService.updateBoard(boardId, req.body.name, req.body.privacy)
+    res.json(updatedBoard)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })
@@ -41,7 +43,8 @@ const updateBoard = async (req, res) => {
 
 const deleteBoard = async (req, res) => {
   try {
-    await boardsService.deleteBoard(parseInt(req.params.id))
+    const boardId = parseInt(req.params.id)
+    await boardsService.deleteBoard(boardId)
     res.json({ message: 'Board deleted' })
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
@@ -51,8 +54,10 @@ const deleteBoard = async (req, res) => {
 
 const addMember = async (req, res) => {
   try {
-    const member = await boardsService.addMember(parseInt(req.params.id), parseInt(req.body.userId))
-    res.status(201).json(member)
+    const boardId = parseInt(req.params.id)
+    const userId = parseInt(req.body.userId)
+    const newMember = await boardsService.addMember(boardId, userId)
+    res.status(201).json(newMember)
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message })
     res.status(500).json({ error: 'Internal server error' })

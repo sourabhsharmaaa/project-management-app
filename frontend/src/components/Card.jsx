@@ -6,40 +6,40 @@ import styles from './Card.module.css'
 
 export default function Card({ card, boardMembers, onCardUpdate, onCardDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id })
-  const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(card.name)
-  const [description, setDescription] = useState(card.description || '')
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedName, setEditedName] = useState(card.name)
+  const [editedDescription, setEditedDescription] = useState(card.description || '')
 
   const dragStyle = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.4 : 1,
+    opacity: isDragging ? 0 : 1,
   }
 
-  const handleSave = async () => {
+  const handleSaveCard = async () => {
     try {
-      const updated = await updateCard(card.id, { name, description })
-      setEditing(false)
-      onCardUpdate(updated)
+      const updatedCard = await updateCard(card.id, { name: editedName, description: editedDescription })
+      setIsEditing(false)
+      onCardUpdate(updatedCard)
     } catch (err) {
       console.error('Failed to save card', err)
     }
   }
 
-  const handleAssign = async (e) => {
+  const handleAssignUser = async (e) => {
     if (e.target.value === '') return
-    const userId = parseInt(e.target.value)
+    const selectedUserId = parseInt(e.target.value)
     try {
-      const updated = userId
-        ? await assignUser(card.id, { userId })
+      const updatedCard = selectedUserId
+        ? await assignUser(card.id, { userId: selectedUserId })
         : await unassignUser(card.id)
-      onCardUpdate(updated)
+      onCardUpdate(updatedCard)
     } catch (err) {
       console.error('Failed to assign user', err)
     }
   }
 
-  const handleDelete = async () => {
+  const handleDeleteCard = async () => {
     try {
       await deleteCard(card.id)
       onCardDelete(card.id)
@@ -50,18 +50,18 @@ export default function Card({ card, boardMembers, onCardUpdate, onCardDelete })
 
   return (
     <div ref={setNodeRef} style={dragStyle} className={styles.card} {...attributes} {...listeners}>
-      {editing ? (
+      {isEditing ? (
         <div className={styles.editForm}>
-          <input value={name} onChange={e => setName(e.target.value)} />
+          <input value={editedName} onChange={e => setEditedName(e.target.value)} />
           <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
+            value={editedDescription}
+            onChange={e => setEditedDescription(e.target.value)}
             rows={2}
             placeholder="Description (optional)"
           />
           <div className={styles.editButtons}>
-            <button onClick={handleSave}>Save</button>
-            <button className="secondary" onClick={() => setEditing(false)}>Cancel</button>
+            <button onClick={handleSaveCard}>Save</button>
+            <button className="secondary" onClick={() => setIsEditing(false)}>Cancel</button>
           </div>
         </div>
       ) : (
@@ -71,15 +71,15 @@ export default function Card({ card, boardMembers, onCardUpdate, onCardDelete })
             <div className={styles.description}>{card.description}</div>
           )}
           <div className={styles.actions}>
-            <button className={`secondary ${styles.actionBtn}`} onClick={() => setEditing(true)}>Edit</button>
-            <select onChange={handleAssign} value={card.assignedUserId || ''} className={styles.actionBtn}>
+            <button className={`secondary ${styles.actionBtn}`} onClick={() => setIsEditing(true)}>Edit</button>
+            <select onChange={handleAssignUser} value={card.assignedUserId || ''} className={styles.actionBtn}>
               <option value="">Assign user…</option>
               {card.assignedUserId && <option value="0">Unassign</option>}
-              {boardMembers.map(m => (
-                <option key={m.userId} value={m.userId}>{m.user.name}</option>
+              {boardMembers.map(member => (
+                <option key={member.userId} value={member.userId}>{member.user.name}</option>
               ))}
             </select>
-            <button className={`danger ${styles.actionBtn}`} onClick={handleDelete}>Delete</button>
+            <button className={`danger ${styles.actionBtn}`} onClick={handleDeleteCard}>Delete</button>
           </div>
         </>
       )}

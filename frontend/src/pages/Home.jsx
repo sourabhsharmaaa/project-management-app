@@ -5,23 +5,23 @@ import styles from './Home.module.css'
 
 export default function Home() {
   const [boards, setBoards] = useState([])
-  const [name, setName] = useState('')
-  const [privacy, setPrivacy] = useState('PUBLIC')
-  const [error, setError] = useState('')
+  const [boardName, setBoardName] = useState('')
+  const [boardPrivacy, setBoardPrivacy] = useState('PUBLIC')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     getBoards().then(setBoards).catch(console.error)
   }, [])
 
-  const handleCreate = async (e) => {
+  const handleCreateBoard = async (e) => {
     e.preventDefault()
-    setError('')
+    setErrorMessage('')
     try {
-      const board = await createBoard({ name, privacy })
-      setBoards([...boards, board])
-      setName('')
+      const newBoard = await createBoard({ name: boardName, privacy: boardPrivacy })
+      setBoards([...boards, newBoard])
+      setBoardName('')
     } catch (err) {
-      setError(err.error || 'Failed to create board')
+      setErrorMessage(err.error || 'Failed to create board')
     }
   }
 
@@ -29,29 +29,29 @@ export default function Home() {
     <div className={styles.container}>
       <h1>Boards</h1>
 
-      <form onSubmit={handleCreate} className={styles.createForm}>
+      <form onSubmit={handleCreateBoard} className={styles.createForm}>
         <input
           placeholder="Board name"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          value={boardName}
+          onChange={e => setBoardName(e.target.value)}
           className={styles.nameInput}
           required
         />
-        <select value={privacy} onChange={e => setPrivacy(e.target.value)} className={styles.privacySelect}>
+        <select value={boardPrivacy} onChange={e => setBoardPrivacy(e.target.value)} className={styles.privacySelect}>
           <option value="PUBLIC">Public</option>
           <option value="PRIVATE">Private</option>
         </select>
         <button type="submit">Create Board</button>
       </form>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
       <div className={styles.boardGrid}>
-        {boards.map(b => (
+        {boards.map(board => (
           <BoardCard
-            key={b.id}
-            board={b}
-            onDelete={(id) => setBoards(boards.filter(x => x.id !== id))}
+            key={board.id}
+            board={board}
+            onDelete={(deletedBoardId) => setBoards(boards.filter(b => b.id !== deletedBoardId))}
           />
         ))}
       </div>

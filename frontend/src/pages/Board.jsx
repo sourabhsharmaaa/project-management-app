@@ -84,15 +84,15 @@ export default function Board() {
     if (!over) return
 
     const activeId = Number(active.id)
-    const isOverList = String(over.id).startsWith('list-')
-    const overListId = isOverList
+    const isDroppedOnList = String(over.id).startsWith('list-')
+    const targetListId = isDroppedOnList
       ? parseInt(String(over.id).replace('list-', ''))
       : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
 
-    if (!overListId) return
+    if (!targetListId) return
 
     const sourceList = board.lists.find(l => l.cards.some(c => c.id === activeId))
-    if (!sourceList || sourceList.id === overListId) return
+    if (!sourceList || sourceList.id === targetListId) return
 
     const draggedCard = sourceList.cards.find(c => c.id === activeId)
 
@@ -100,31 +100,31 @@ export default function Board() {
       ...prev,
       lists: prev.lists.map(l => {
         if (l.id === sourceList.id) return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
-        if (l.id === overListId) return { ...l, cards: [...l.cards, { ...draggedCard, boardListId: overListId }] }
+        if (l.id === targetListId) return { ...l, cards: [...l.cards, { ...draggedCard, boardListId: targetListId }] }
         return l
       })
     }))
   }
 
   const handleDragEnd = async ({ active, over }) => {
-    const originalListId = activeCard?.boardListId
+    const sourceListId = activeCard?.boardListId
     setActiveCard(null)
     if (!over) return
 
     const activeId = Number(active.id)
-    const isOverList = String(over.id).startsWith('list-')
-    const overListId = isOverList
+    const isDroppedOnList = String(over.id).startsWith('list-')
+    const targetListId = isDroppedOnList
       ? parseInt(String(over.id).replace('list-', ''))
       : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
 
-    if (!overListId) return
+    if (!targetListId) return
 
-    if (originalListId !== overListId) {
-      const updated = await moveCard(activeId, { targetListId: overListId })
+    if (sourceListId !== targetListId) {
+      const updated = await moveCard(activeId, { targetListId })
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
-          if (l.id === overListId) return { ...l, cards: l.cards.map(c => c.id === activeId ? updated : c).sort((a, b) => a.position - b.position) }
+          if (l.id === targetListId) return { ...l, cards: l.cards.map(c => c.id === activeId ? updated : c).sort((a, b) => a.position - b.position) }
           return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
         })
       }))
@@ -132,10 +132,10 @@ export default function Board() {
       if (active.id === over.id) return
 
       let afterCardId
-      if (isOverList) {
+      if (isDroppedOnList) {
         afterCardId = null
       } else {
-        const list = board.lists.find(l => l.id === overListId)
+        const list = board.lists.find(l => l.id === targetListId)
         const activeIndex = list.cards.findIndex(c => c.id === activeId)
         const overIndex = list.cards.findIndex(c => c.id === Number(over.id))
         afterCardId = activeIndex > overIndex
@@ -147,7 +147,7 @@ export default function Board() {
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
-          if (l.id !== overListId) return l
+          if (l.id !== targetListId) return l
           return { ...l, cards: l.cards.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position) }
         })
       }))

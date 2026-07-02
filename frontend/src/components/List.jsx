@@ -7,9 +7,9 @@ import styles from './List.module.css'
 
 export default function List({ list, boardMembers, onListDelete, onCardCreate, onCardUpdate, onCardDelete }) {
   const { setNodeRef } = useDroppable({ id: `list-${list.id}` })
-  const [cardName, setCardName] = useState('')
-  const [cardDesc, setCardDesc] = useState('')
-  const [showForm, setShowForm] = useState(false)
+  const [newCardName, setNewCardName] = useState('')
+  const [newCardDescription, setNewCardDescription] = useState('')
+  const [showAddCardForm, setShowAddCardForm] = useState(false)
 
   const handleDeleteList = async () => {
     try {
@@ -23,10 +23,10 @@ export default function List({ list, boardMembers, onListDelete, onCardCreate, o
   const handleCreateCard = async (e) => {
     e.preventDefault()
     try {
-      const newCard = await createCard(list.id, { name: cardName, description: cardDesc })
-      setCardName('')
-      setCardDesc('')
-      setShowForm(false)
+      const newCard = await createCard(list.id, { name: newCardName, description: newCardDescription })
+      setNewCardName('')
+      setNewCardDescription('')
+      setShowAddCardForm(false)
       onCardCreate(list.id, newCard)
     } catch (err) {
       console.error('Failed to create card', err)
@@ -54,27 +54,27 @@ export default function List({ list, boardMembers, onListDelete, onCardCreate, o
         </div>
       </SortableContext>
 
-      {showForm ? (
+      {showAddCardForm ? (
         <form onSubmit={handleCreateCard} className={styles.addCardForm}>
           <input
             placeholder="Card name"
-            value={cardName}
-            onChange={e => setCardName(e.target.value)}
+            value={newCardName}
+            onChange={e => setNewCardName(e.target.value)}
             required
             autoFocus
           />
           <input
             placeholder="Description (optional)"
-            value={cardDesc}
-            onChange={e => setCardDesc(e.target.value)}
+            value={newCardDescription}
+            onChange={e => setNewCardDescription(e.target.value)}
           />
           <div className={styles.addCardFormButtons}>
             <button type="submit">Add Card</button>
-            <button type="button" className="secondary" onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="button" className="secondary" onClick={() => setShowAddCardForm(false)}>Cancel</button>
           </div>
         </form>
       ) : (
-        <button className={`secondary ${styles.addCardBtn}`} onClick={() => setShowForm(true)}>
+        <button className={`secondary ${styles.addCardBtn}`} onClick={() => setShowAddCardForm(true)}>
           + Add Card
         </button>
       )}
