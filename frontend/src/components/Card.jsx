@@ -51,7 +51,7 @@ export default function Card({ card, boardMembers, onUpdate }) {
   }
 
   return (
-    <div ref={setNodeRef} style={dragStyle} className={styles.card}>
+    <div ref={setNodeRef} style={dragStyle} className={styles.card} {...attributes} {...listeners}>
       {editing ? (
         <div className={styles.editForm}>
           <input value={name} onChange={e => setName(e.target.value)} />
@@ -68,7 +68,6 @@ export default function Card({ card, boardMembers, onUpdate }) {
         </div>
       ) : (
         <>
-          <div {...attributes} {...listeners} className={styles.dragHandle}>⠿ drag</div>
           <div className={styles.cardName}>{card.name}</div>
           {card.description && (
             <div className={styles.description}>{card.description}</div>

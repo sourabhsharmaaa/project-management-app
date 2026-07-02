@@ -4,13 +4,7 @@
   padding: 12px;
   margin-bottom: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.dragHandle {
   cursor: grab;
-  margin-bottom: 6px;
-  color: #aaa;
-  font-size: 12px;
 }
 
 .cardName {
