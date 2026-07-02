@@ -80,75 +80,50 @@ export default function Board() {
     setActiveCard(card || null)
   }
 
-  const handleDragOver = ({ active, over }) => {
-    if (!over) return
+  const handleDragEnd = async ({ active, over }) => {
+    setActiveCard(null)
+    if (!over || active.id === over.id) return
 
     const activeId = Number(active.id)
     const isDroppedOnList = String(over.id).startsWith('list-')
-    const targetListId = isDroppedOnList
-      ? parseInt(String(over.id).replace('list-', ''))
-      : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
-
-    if (!targetListId) return
 
     const sourceList = board.lists.find(l => l.cards.some(c => c.id === activeId))
-    if (!sourceList || sourceList.id === targetListId) return
+    if (!sourceList) return
 
-    const draggedCard = sourceList.cards.find(c => c.id === activeId)
-
-    setBoard(prev => ({
-      ...prev,
-      lists: prev.lists.map(l => {
-        if (l.id === sourceList.id) return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
-        if (l.id === targetListId) return { ...l, cards: [...l.cards, { ...draggedCard, boardListId: targetListId }] }
-        return l
-      })
-    }))
-  }
-
-  const handleDragEnd = async ({ active, over }) => {
-    const sourceListId = activeCard?.boardListId
-    setActiveCard(null)
-    if (!over) return
-
-    const activeId = Number(active.id)
-    const isDroppedOnList = String(over.id).startsWith('list-')
     const targetListId = isDroppedOnList
       ? parseInt(String(over.id).replace('list-', ''))
       : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
 
     if (!targetListId) return
 
-    if (sourceListId !== targetListId) {
-      const updated = await moveCard(activeId, { targetListId })
+    if (sourceList.id !== targetListId) {
+      const updatedCard = await moveCard(activeId, { targetListId })
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
-          if (l.id === targetListId) return { ...l, cards: l.cards.map(c => c.id === activeId ? updated : c).sort((a, b) => a.position - b.position) }
-          return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
+          if (l.id === sourceList.id) return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
+          if (l.id === targetListId) return { ...l, cards: [...l.cards, updatedCard].sort((a, b) => a.position - b.position) }
+          return l
         })
       }))
     } else {
-      if (active.id === over.id) return
-
       let afterCardId
       if (isDroppedOnList) {
         afterCardId = null
       } else {
-        const list = board.lists.find(l => l.id === targetListId)
-        const activeIndex = list.cards.findIndex(c => c.id === activeId)
-        const overIndex = list.cards.findIndex(c => c.id === Number(over.id))
+        const activeIndex = sourceList.cards.findIndex(c => c.id === activeId)
+        const overIndex = sourceList.cards.findIndex(c => c.id === Number(over.id))
         afterCardId = activeIndex > overIndex
-          ? (overIndex > 0 ? list.cards[overIndex - 1].id : null)
+          ? (overIndex > 0 ? sourceList.cards[overIndex - 1].id : null)
           : Number(over.id)
       }
 
-      const updated = await reorderCard(activeId, { afterCardId })
+      const updatedCard = await reorderCard(activeId, { afterCardId })
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
           if (l.id !== targetListId) return l
-          return { ...l, cards: l.cards.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position) }
+          return { ...l, cards: l.cards.map(c => c.id === updatedCard.id ? updatedCard : c).sort((a, b) => a.position - b.position) }
         })
       }))
     }
@@ -197,7 +172,7 @@ export default function Board() {
         )}
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className={styles.listsContainer}>
           {board.lists.map(list => (
             <List
