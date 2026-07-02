@@ -17,10 +17,8 @@ export default function Board() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
-  const refresh = () => getBoard(id).then(setBoard).catch(console.error)
-
   useEffect(() => {
-    refresh()
+    getBoard(id).then(setBoard).catch(console.error)
     getUsers().then(setUsers).catch(console.error)
   }, [id])
 
