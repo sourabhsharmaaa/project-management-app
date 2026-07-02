@@ -56,21 +56,36 @@ Health check: GET `http://localhost:3000/health`
 
 ## API Documentation
 
-See `docs/api.md` for the full API reference with all 17 endpoints.
+See `docs/api.md` for the full API reference with all 18 endpoints.
 
 ## Project Structure
 
 ```
-src/
+backend/
   app.js                  — Express setup and route mounting
   index.js                — Server entry point
   lib/
     prisma.js             — Shared Prisma client
   modules/
-    users/                — User endpoints
-    boards/               — Board endpoints
-    lists/                — List endpoints
-    cards/                — Card endpoints
+    users/                — users.routes.js, controller, service, repository
+    boards/               — boards.routes.js, controller, service, repository
+    lists/                — lists.routes.js, controller, service, repository
+    cards/                — cards.routes.js, controller, service, repository
+frontend/
+  index.html              — HTML entry point
+  vite.config.js          — Vite config
+  src/
+    main.jsx              — React entry point
+    App.jsx               — Root component and routing
+    api/
+      index.js            — All backend API calls in one place
+    components/
+      BoardCard.jsx       — Board preview card
+      List.jsx            — List column with cards
+      Card.jsx            — Draggable card
+    pages/
+      Home.jsx            — Board listing page
+      Board.jsx           — Board detail with drag-and-drop
 prisma/
   schema.prisma           — Database schema
 docs/

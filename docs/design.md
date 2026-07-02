@@ -111,7 +111,6 @@ This means the application code only needs to issue a single delete — the data
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/boards/:boardId/lists` | Create a list inside a board |
-| GET | `/lists/:id` | Get one list with cards |
 | PUT | `/lists/:id` | Update list |
 | DELETE | `/lists/:id` | Delete list (cascades) |
 
@@ -119,19 +118,19 @@ This means the application code only needs to issue a single delete — the data
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/lists/:listId/cards` | Create a card inside a list |
-| GET | `/cards/:id` | Get one card |
 | PUT | `/cards/:id` | Update card |
 | DELETE | `/cards/:id` | Delete card |
 | PUT | `/cards/:id/assign` | Assign user to card |
 | PUT | `/cards/:id/unassign` | Unassign user from card |
 | PUT | `/cards/:id/move` | Move card to another list |
+| PUT | `/cards/:id/reorder` | Reorder card within its list |
 
 ---
 
 ## Project Structure
 
 ```
-src/
+backend/
   app.js              — Express setup, middleware, all route mounting
   index.js            — Starts the HTTP server
   lib/
@@ -140,15 +139,38 @@ src/
     users/
       users.routes.js
       users.controller.js
+      users.service.js
+      users.repository.js
     boards/
       boards.routes.js
       boards.controller.js
+      boards.service.js
+      boards.repository.js
     lists/
       lists.routes.js
       lists.controller.js
+      lists.service.js
+      lists.repository.js
     cards/
       cards.routes.js
       cards.controller.js
+      cards.service.js
+      cards.repository.js
+frontend/
+  index.html          — HTML entry point
+  vite.config.js      — Vite config
+  src/
+    main.jsx          — React entry point
+    App.jsx           — Root component and routing
+    api/
+      index.js        — All backend API calls in one place
+    components/
+      BoardCard.jsx   — Board preview card on the home page
+      List.jsx        — List column with its cards
+      Card.jsx        — Draggable card inside a list
+    pages/
+      Home.jsx        — Board listing page
+      Board.jsx       — Board detail with drag-and-drop
 prisma/
   schema.prisma       — Database schema
 docs/
@@ -156,7 +178,7 @@ docs/
   design.md           — This document
 ```
 
-Each module is self-contained with its own routes and controller. If you want to find anything related to boards, you go to the boards folder — nothing else to look at.
+Each module is self-contained: routes, controller, service, and repository all live in the same folder. If you want to find anything related to boards, you go to the boards folder — nothing else to look at.
 
 ---
 
