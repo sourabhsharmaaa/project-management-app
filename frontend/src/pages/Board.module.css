@@ -37,7 +37,6 @@
   padding: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   cursor: grabbing;
-  transform: rotate(2deg);
   min-width: 256px;
 }
 
