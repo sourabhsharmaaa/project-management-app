@@ -38,10 +38,10 @@ export default function Board() {
   const handleAddMember = async (e) => {
     e.preventDefault()
     try {
-      await addMember(id, { userId: parseInt(selectedUserId) })
+      const newMember = await addMember(id, { userId: parseInt(selectedUserId) })
       setSelectedUserId('')
       setShowMemberForm(false)
-      refresh()
+      setBoard(prev => ({ ...prev, members: [...prev.members, newMember] }))
     } catch (err) {
       console.error('Failed to add member', err)
     }
