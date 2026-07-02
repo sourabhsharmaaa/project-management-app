@@ -121,15 +121,6 @@ Errors: `400` name missing | `404` board not found
 
 ---
 
-### Get One List
-**GET** `/lists/:id`
-
-Response (200): List with all its cards nested inside.
-
-Errors: `404` list not found
-
----
-
 ### Update a List
 **PUT** `/lists/:id`
 
@@ -172,15 +163,6 @@ Response (201):
 { "id": 1, "name": "Build login page", "description": "Use React", "boardListId": 1, "assignedUserId": null, "createdAt": "..." }
 ```
 Errors: `400` name missing | `404` list not found
-
----
-
-### Get One Card
-**GET** `/cards/:id`
-
-Response (200): Card with its assigned user and parent list included.
-
-Errors: `404` card not found
 
 ---
 
