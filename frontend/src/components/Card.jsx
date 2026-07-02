@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { updateCard, moveCard, reorderCard, assignUser, unassignUser, deleteCard } from '../api'
+import { updateCard, moveCard, assignUser, unassignUser, deleteCard } from '../api'
 
 export default function Card({ card, lists, boardMembers, onUpdate }) {
   const [editing, setEditing] = useState(false)
@@ -54,15 +54,6 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
     }
   }
 
-  const handleReorderUp = async () => {
-    try {
-      await reorderCard(card.id, { afterCardId: null })
-      onUpdate()
-    } catch (err) {
-      console.error('Failed to reorder card', err)
-    }
-  }
-
   return (
     <div style={{
       background: 'white',
@@ -113,9 +104,6 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
                 <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </select>
-            <button className="secondary" style={{ fontSize: 12 }} onClick={handleReorderUp}>
-              Move to top
-            </button>
             <button className="danger" style={{ fontSize: 12 }} onClick={handleDelete}>
               Delete
             </button>
