@@ -80,13 +80,10 @@ export default function Board() {
     setActiveCard(card || null)
   }
 
-  const handleDragEnd = async ({ active, over }) => {
-    setActiveCard(null)
-    if (!over || active.id === over.id) return
+  const handleDragOver = ({ active, over }) => {
+    if (!over) return
 
-    const draggedCard = board.lists.flatMap(l => l.cards).find(c => c.id === Number(active.id))
-    if (!draggedCard) return
-
+    const activeId = Number(active.id)
     const isOverList = String(over.id).startsWith('list-')
     const overListId = isOverList
       ? parseInt(String(over.id).replace('list-', ''))
@@ -94,27 +91,64 @@ export default function Board() {
 
     if (!overListId) return
 
-    if (draggedCard.boardListId !== overListId) {
-      const updated = await moveCard(draggedCard.id, { targetListId: overListId })
+    const sourceList = board.lists.find(l => l.cards.some(c => c.id === activeId))
+    if (!sourceList || sourceList.id === overListId) return
+
+    const draggedCard = sourceList.cards.find(c => c.id === activeId)
+
+    setBoard(prev => ({
+      ...prev,
+      lists: prev.lists.map(l => {
+        if (l.id === sourceList.id) return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
+        if (l.id === overListId) return { ...l, cards: [...l.cards, { ...draggedCard, boardListId: overListId }] }
+        return l
+      })
+    }))
+  }
+
+  const handleDragEnd = async ({ active, over }) => {
+    const originalListId = activeCard?.boardListId
+    setActiveCard(null)
+    if (!over) return
+
+    const activeId = Number(active.id)
+    const isOverList = String(over.id).startsWith('list-')
+    const overListId = isOverList
+      ? parseInt(String(over.id).replace('list-', ''))
+      : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
+
+    if (!overListId) return
+
+    if (originalListId !== overListId) {
+      const updated = await moveCard(activeId, { targetListId: overListId })
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
-          if (l.id === draggedCard.boardListId) return { ...l, cards: l.cards.filter(c => c.id !== draggedCard.id) }
-          if (l.id === overListId) return { ...l, cards: [...l.cards, updated].sort((a, b) => a.position - b.position) }
-          return l
+          if (l.id === overListId) return { ...l, cards: l.cards.map(c => c.id === activeId ? updated : c).sort((a, b) => a.position - b.position) }
+          return { ...l, cards: l.cards.filter(c => c.id !== activeId) }
         })
       }))
     } else {
-      const afterCardId = isOverList ? null : Number(over.id)
-      const updated = await reorderCard(draggedCard.id, { afterCardId })
+      if (active.id === over.id) return
+
+      let afterCardId
+      if (isOverList) {
+        afterCardId = null
+      } else {
+        const list = board.lists.find(l => l.id === overListId)
+        const activeIndex = list.cards.findIndex(c => c.id === activeId)
+        const overIndex = list.cards.findIndex(c => c.id === Number(over.id))
+        afterCardId = activeIndex > overIndex
+          ? (overIndex > 0 ? list.cards[overIndex - 1].id : null)
+          : Number(over.id)
+      }
+
+      const updated = await reorderCard(activeId, { afterCardId })
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
           if (l.id !== overListId) return l
-          return {
-            ...l,
-            cards: l.cards.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position)
-          }
+          return { ...l, cards: l.cards.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position) }
         })
       }))
     }
@@ -163,7 +197,7 @@ export default function Board() {
         )}
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div className={styles.listsContainer}>
           {board.lists.map(list => (
             <List
