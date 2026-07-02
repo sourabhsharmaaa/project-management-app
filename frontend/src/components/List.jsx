@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { createCard, deleteList } from '../api'
 import CardComponent from './Card'
+import styles from './List.module.css'
 
 export default function List({ list, boardMembers, onBoardRefresh }) {
+  const { setNodeRef } = useDroppable({ id: `list-${list.id}` })
   const [cardName, setCardName] = useState('')
   const [cardDesc, setCardDesc] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -26,30 +30,27 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
   }
 
   return (
-    <div style={{
-      background: '#ebecf0',
-      borderRadius: 8,
-      padding: 12,
-      minWidth: 280,
-      maxWidth: 280,
-      flexShrink: 0
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ fontSize: 15 }}>{list.name}</h3>
-        <button className="danger" onClick={handleDeleteList} style={{ fontSize: 11, padding: '3px 8px' }}>Delete</button>
+    <div className={styles.list}>
+      <div className={styles.header}>
+        <h3 className={styles.title}>{list.name}</h3>
+        <button className={`danger ${styles.deleteBtn}`} onClick={handleDeleteList}>Delete</button>
       </div>
 
-      {list.cards.map(card => (
-        <CardComponent
-          key={card.id}
-          card={card}
-          boardMembers={boardMembers}
-          onUpdate={onBoardRefresh}
-        />
-      ))}
+      <SortableContext items={list.cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+        <div ref={setNodeRef} className={styles.cardsContainer}>
+          {list.cards.map(card => (
+            <CardComponent
+              key={card.id}
+              card={card}
+              boardMembers={boardMembers}
+              onUpdate={onBoardRefresh}
+            />
+          ))}
+        </div>
+      </SortableContext>
 
       {showForm ? (
-        <form onSubmit={handleCreateCard} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <form onSubmit={handleCreateCard} className={styles.addCardForm}>
           <input
             placeholder="Card name"
             value={cardName}
@@ -62,13 +63,13 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
             value={cardDesc}
             onChange={e => setCardDesc(e.target.value)}
           />
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div className={styles.addCardFormButtons}>
             <button type="submit">Add Card</button>
             <button type="button" className="secondary" onClick={() => setShowForm(false)}>Cancel</button>
           </div>
         </form>
       ) : (
-        <button className="secondary" style={{ width: '100%', marginTop: 4 }} onClick={() => setShowForm(true)}>
+        <button className={`secondary ${styles.addCardBtn}`} onClick={() => setShowForm(true)}>
           + Add Card
         </button>
       )}

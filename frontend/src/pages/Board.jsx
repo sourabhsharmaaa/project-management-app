@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getBoard, createList, addMember, getUsers } from '../api'
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { getBoard, createList, addMember, getUsers, moveCard, reorderCard } from '../api'
 import List from '../components/List'
+import styles from './Board.module.css'
 
 export default function Board() {
   const { id } = useParams()
@@ -11,6 +13,8 @@ export default function Board() {
   const [users, setUsers] = useState([])
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState('')
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const refresh = () => getBoard(id).then(setBoard).catch(console.error)
 
@@ -42,23 +46,44 @@ export default function Board() {
     }
   }
 
-  if (!board) return <div style={{ padding: 32 }}>Loading…</div>
+  const handleDragEnd = async ({ active, over }) => {
+    if (!over || active.id === over.id) return
+
+    const activeCard = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
+    if (!activeCard) return
+
+    const overListId = String(over.id).startsWith('list-')
+      ? parseInt(String(over.id).replace('list-', ''))
+      : board.lists.find(l => l.cards.some(c => c.id === over.id))?.id
+
+    if (!overListId) return
+
+    if (activeCard.boardListId !== overListId) {
+      await moveCard(activeCard.id, { targetListId: overListId })
+    } else {
+      const afterCardId = String(over.id).startsWith('list-') ? null : over.id
+      await reorderCard(activeCard.id, { afterCardId })
+    }
+    refresh()
+  }
+
+  if (!board) return <div className={styles.container}>Loading…</div>
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+    <div className={styles.container}>
+      <div className={styles.header}>
         <button className="secondary" onClick={() => navigate('/')}>← Boards</button>
-        <h1 style={{ fontSize: 22 }}>{board.name}</h1>
-        <span style={{ fontSize: 13, color: '#666' }}>{board.privacy}</span>
+        <h1 className={styles.title}>{board.name}</h1>
+        <span className={styles.privacy}>{board.privacy}</span>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className={styles.toolbar}>
         <form onSubmit={handleCreateList} style={{ display: 'flex', gap: 8 }}>
           <input
             placeholder="New list name"
             value={listName}
             onChange={e => setListName(e.target.value)}
-            style={{ width: 180 }}
+            className={styles.listNameInput}
             required
           />
           <button type="submit">Add List</button>
@@ -66,7 +91,12 @@ export default function Board() {
 
         {showMemberForm ? (
           <form onSubmit={handleAddMember} style={{ display: 'flex', gap: 8 }}>
-            <select value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} style={{ width: 160 }} required>
+            <select
+              value={selectedUserId}
+              onChange={e => setSelectedUserId(e.target.value)}
+              className={styles.memberSelect}
+              required
+            >
               <option value="">Select user…</option>
               {users.filter(u => !board.members.find(m => m.userId === u.id)).map(u => (
                 <option key={u.id} value={u.id}>{u.name}</option>
@@ -80,16 +110,18 @@ export default function Board() {
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 16 }}>
-        {board.lists.map(list => (
-          <List
-            key={list.id}
-            list={list}
-            boardMembers={board.members}
-            onBoardRefresh={refresh}
-          />
-        ))}
-      </div>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className={styles.listsContainer}>
+          {board.lists.map(list => (
+            <List
+              key={list.id}
+              list={list}
+              boardMembers={board.members}
+              onBoardRefresh={refresh}
+            />
+          ))}
+        </div>
+      </DndContext>
     </div>
   )
 }

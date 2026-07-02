@@ -17,7 +17,7 @@ const put = (url, data) =>
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
-  }).then(json)
+  }).then(json) 
 
 const del = (url) =>
   fetch(`${BASE}${url}`, { method: 'DELETE' }).then(json)
@@ -30,6 +30,8 @@ export const getBoard = (id) => get(`/boards/${id}`)
 export const createList = (boardId, data) => post(`/boards/${boardId}/lists`, data)
 export const createCard = (listId, data) => post(`/lists/${listId}/cards`, data)
 export const updateCard = (id, data) => put(`/cards/${id}`, data)
+export const moveCard = (id, data) => put(`/cards/${id}/move`, data)
+export const reorderCard = (id, data) => put(`/cards/${id}/reorder`, data)
 export const assignUser = (id, data) => put(`/cards/${id}/assign`, data)
 export const unassignUser = (id) => put(`/cards/${id}/unassign`, {})
 export const getUsers = () => get('/users')

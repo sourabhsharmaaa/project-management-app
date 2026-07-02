@@ -1,0 +1,44 @@
+.list {
+  background: #ebecf0;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 280px;
+  max-width: 280px;
+  flex-shrink: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 15px;
+}
+
+.deleteBtn {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.cardsContainer {
+  min-height: 8px;
+}
+
+.addCardForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addCardFormButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.addCardBtn {
+  width: 100%;
+  margin-top: 4px;
+}

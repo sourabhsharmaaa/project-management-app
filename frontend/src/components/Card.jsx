@@ -1,10 +1,20 @@
 import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { updateCard, assignUser, unassignUser, deleteCard } from '../api'
+import styles from './Card.module.css'
 
 export default function Card({ card, boardMembers, onUpdate }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id })
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(card.name)
   const [description, setDescription] = useState(card.description || '')
+
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
 
   const handleSave = async () => {
     try {
@@ -41,15 +51,9 @@ export default function Card({ card, boardMembers, onUpdate }) {
   }
 
   return (
-    <div style={{
-      background: 'white',
-      borderRadius: 6,
-      padding: 12,
-      marginBottom: 8,
-      boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-    }}>
+    <div ref={setNodeRef} style={dragStyle} className={styles.card}>
       {editing ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className={styles.editForm}>
           <input value={name} onChange={e => setName(e.target.value)} />
           <textarea
             value={description}
@@ -57,36 +61,31 @@ export default function Card({ card, boardMembers, onUpdate }) {
             rows={2}
             placeholder="Description (optional)"
           />
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div className={styles.editButtons}>
             <button onClick={handleSave}>Save</button>
             <button className="secondary" onClick={() => setEditing(false)}>Cancel</button>
           </div>
         </div>
       ) : (
         <>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>{card.name}</div>
+          <div {...attributes} {...listeners} className={styles.dragHandle}>⠿ drag</div>
+          <div className={styles.cardName}>{card.name}</div>
           {card.description && (
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>{card.description}</div>
+            <div className={styles.description}>{card.description}</div>
           )}
           {card.assignedUser && (
-            <div style={{ fontSize: 12, color: '#0052cc', marginBottom: 6 }}>
-              Assigned: {card.assignedUser.name}
-            </div>
+            <div className={styles.assignedUser}>Assigned: {card.assignedUser.name}</div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-            <button className="secondary" style={{ fontSize: 12 }} onClick={() => setEditing(true)}>
-              Edit
-            </button>
-            <select onChange={handleAssign} defaultValue="" style={{ fontSize: 12 }}>
+          <div className={styles.actions}>
+            <button className={`secondary ${styles.actionBtn}`} onClick={() => setEditing(true)}>Edit</button>
+            <select onChange={handleAssign} defaultValue="" className={styles.actionBtn}>
               <option value="">Assign user…</option>
               {card.assignedUserId && <option value="0">Unassign</option>}
               {boardMembers.map(m => (
                 <option key={m.userId} value={m.userId}>{m.user.name}</option>
               ))}
             </select>
-            <button className="danger" style={{ fontSize: 12 }} onClick={handleDelete}>
-              Delete
-            </button>
+            <button className={`danger ${styles.actionBtn}`} onClick={handleDelete}>Delete</button>
           </div>
         </>
       )}
