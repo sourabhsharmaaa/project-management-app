@@ -16,6 +16,8 @@ A full-stack Trello-like project management application. The backend is a REST A
 | React 19 | Frontend | UI components | Component model maps naturally to boards, lists, and cards |
 | React Router v7 | Frontend | Client-side routing | Declarative routing between Home and Board pages |
 | Vite | Frontend | Dev server and bundler | Fast HMR, zero config for React projects |
+| @dnd-kit | Frontend | Drag-and-drop | Accessible, pointer-based DnD for reordering and moving cards between lists |
+| CSS Modules | Frontend | Component styling | Scoped class names per component, no global style leakage |
 
 ---
 
@@ -75,6 +77,7 @@ Unique constraint on `(userId, boardId)` — a user cannot be added to the same 
 | description | String | Optional |
 | boardListId | Int | Foreign key → BoardList (cascade delete) |
 | assignedUserId | Int? | Foreign key → User, nullable, defaults to null |
+| position | Float | Fractional index used to order cards within a list |
 | createdAt | DateTime | Auto-generated |
 
 ### Cascade Deletes
@@ -168,12 +171,17 @@ frontend/
     api/
       index.js        — All backend API calls in one place
     components/
-      BoardCard.jsx   — Board preview card on the home page
-      List.jsx        — List column with its cards
-      Card.jsx        — Draggable card inside a list
+      BoardCard.jsx         — Board preview card on the home page
+      BoardCard.module.css
+      List.jsx              — List column with its cards
+      List.module.css
+      Card.jsx              — Draggable card inside a list
+      Card.module.css
     pages/
-      Home.jsx        — Board listing page
-      Board.jsx       — Board detail with drag-and-drop
+      Home.jsx              — Board listing page
+      Home.module.css
+      Board.jsx             — Board detail with drag-and-drop
+      Board.module.css
 prisma/
   schema.prisma       — Database schema
 docs/
