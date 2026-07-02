@@ -13,6 +13,8 @@ A Trello-like project management application with a React frontend and a Node.js
 - **React 19** — UI components
 - **React Router v7** — client-side routing
 - **Vite** — dev server and bundler
+- **@dnd-kit** — drag-and-drop for reordering and moving cards between lists
+- **CSS Modules** — scoped component styling
 
 ## Prerequisites
 
@@ -102,11 +104,16 @@ frontend/
       index.js            — All backend API calls in one place
     components/
       BoardCard.jsx       — Board preview card
+      BoardCard.module.css
       List.jsx            — List column with cards
+      List.module.css
       Card.jsx            — Draggable card
+      Card.module.css
     pages/
       Home.jsx            — Board listing page
+      Home.module.css
       Board.jsx           — Board detail with drag-and-drop
+      Board.module.css
 prisma/
   schema.prisma           — Database schema
 docs/

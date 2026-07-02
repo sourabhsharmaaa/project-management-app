@@ -23,14 +23,13 @@
   },
   "homepage": "https://github.com/sourabhsharmaaa/project-management-app#readme",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@prisma/client": "^5.22.0",
     "nodemon": "^3.1.14",
-    "playwright": "^1.61.1",
     "prisma": "^5.22.0"
   }
 }
