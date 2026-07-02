@@ -85,7 +85,6 @@ export default function Board() {
           <List
             key={list.id}
             list={list}
-            lists={board.lists}
             boardMembers={board.members}
             onBoardRefresh={refresh}
           />

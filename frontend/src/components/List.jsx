@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createCard, deleteList } from '../api'
 import CardComponent from './Card'
 
-export default function List({ list, lists, boardMembers, onBoardRefresh }) {
+export default function List({ list, boardMembers, onBoardRefresh }) {
   const [cardName, setCardName] = useState('')
   const [cardDesc, setCardDesc] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -43,7 +43,6 @@ export default function List({ list, lists, boardMembers, onBoardRefresh }) {
         <CardComponent
           key={card.id}
           card={card}
-          lists={lists}
           boardMembers={boardMembers}
           onUpdate={onBoardRefresh}
         />

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { updateCard, moveCard, assignUser, unassignUser, deleteCard } from '../api'
+import { updateCard, assignUser, unassignUser, deleteCard } from '../api'
 
-export default function Card({ card, lists, boardMembers, onUpdate }) {
+export default function Card({ card, boardMembers, onUpdate }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(card.name)
   const [description, setDescription] = useState(card.description || '')
@@ -13,19 +13,6 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
       setEditing(false)
     } catch (err) {
       console.error('Failed to save card', err)
-    }
-  }
-
-  const handleMove = async (e) => {
-    const targetListId = parseInt(e.target.value)
-    if (!targetListId) return
-    try {
-      const updated = await moveCard(card.id, { targetListId })
-      onUpdate(updated)
-      e.target.value = ''
-    } catch (err) {
-      console.error('Failed to move card', err)
-      e.target.value = ''
     }
   }
 
@@ -96,12 +83,6 @@ export default function Card({ card, lists, boardMembers, onUpdate }) {
               {card.assignedUserId && <option value="0">Unassign</option>}
               {boardMembers.map(m => (
                 <option key={m.userId} value={m.userId}>{m.user.name}</option>
-              ))}
-            </select>
-            <select onChange={handleMove} defaultValue="" style={{ fontSize: 12 }}>
-              <option value="">Move to list…</option>
-              {lists.filter(l => l.id !== card.boardListId).map(l => (
-                <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </select>
             <button className="danger" style={{ fontSize: 12 }} onClick={handleDelete}>
