@@ -30,14 +30,14 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
   }
 
   return (
-    <div className={styles.list}>
+    <div ref={setNodeRef} className={styles.list}>
       <div className={styles.header}>
         <h3 className={styles.title}>{list.name}</h3>
         <button className={`danger ${styles.deleteBtn}`} onClick={handleDeleteList}>Delete</button>
       </div>
 
       <SortableContext items={list.cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-        <div ref={setNodeRef} className={styles.cardsContainer}>
+        <div className={styles.cardsContainer}>
           {list.cards.map(card => (
             <CardComponent
               key={card.id}

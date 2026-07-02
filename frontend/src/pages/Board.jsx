@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragOverlay, PointerSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core'
 import { getBoard, createList, addMember, getUsers, moveCard, reorderCard } from '../api'
 import List from '../components/List'
 import styles from './Board.module.css'
@@ -48,7 +48,7 @@ export default function Board() {
   }
 
   const handleDragStart = ({ active }) => {
-    const card = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
+    const card = board.lists.flatMap(l => l.cards).find(c => c.id === Number(active.id))
     setActiveCard(card || null)
   }
 
@@ -56,19 +56,20 @@ export default function Board() {
     setActiveCard(null)
     if (!over || active.id === over.id) return
 
-    const draggedCard = board.lists.flatMap(l => l.cards).find(c => c.id === active.id)
+    const draggedCard = board.lists.flatMap(l => l.cards).find(c => c.id === Number(active.id))
     if (!draggedCard) return
 
-    const overListId = String(over.id).startsWith('list-')
+    const isOverList = String(over.id).startsWith('list-')
+    const overListId = isOverList
       ? parseInt(String(over.id).replace('list-', ''))
-      : board.lists.find(l => l.cards.some(c => c.id === over.id))?.id
+      : board.lists.find(l => l.cards.some(c => c.id === Number(over.id)))?.id
 
     if (!overListId) return
 
     if (draggedCard.boardListId !== overListId) {
       await moveCard(draggedCard.id, { targetListId: overListId })
     } else {
-      const afterCardId = String(over.id).startsWith('list-') ? null : over.id
+      const afterCardId = isOverList ? null : Number(over.id)
       await reorderCard(draggedCard.id, { afterCardId })
     }
     refresh()
@@ -117,7 +118,7 @@ export default function Board() {
         )}
       </div>
 
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className={styles.listsContainer}>
           {board.lists.map(list => (
             <List
