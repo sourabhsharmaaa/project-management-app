@@ -5,7 +5,7 @@ import { createCard, deleteList } from '../api'
 import CardComponent from './Card'
 import styles from './List.module.css'
 
-export default function List({ list, boardMembers, onBoardRefresh }) {
+export default function List({ list, boardMembers, onListDelete, onCardCreate, onCardUpdate, onCardDelete }) {
   const { setNodeRef } = useDroppable({ id: `list-${list.id}` })
   const [cardName, setCardName] = useState('')
   const [cardDesc, setCardDesc] = useState('')
@@ -14,7 +14,7 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
   const handleDeleteList = async () => {
     try {
       await deleteList(list.id)
-      onBoardRefresh()
+      onListDelete(list.id)
     } catch (err) {
       console.error('Failed to delete list', err)
     }
@@ -22,11 +22,15 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
 
   const handleCreateCard = async (e) => {
     e.preventDefault()
-    await createCard(list.id, { name: cardName, description: cardDesc })
-    setCardName('')
-    setCardDesc('')
-    setShowForm(false)
-    onBoardRefresh()
+    try {
+      const newCard = await createCard(list.id, { name: cardName, description: cardDesc })
+      setCardName('')
+      setCardDesc('')
+      setShowForm(false)
+      onCardCreate(list.id, newCard)
+    } catch (err) {
+      console.error('Failed to create card', err)
+    }
   }
 
   return (
@@ -43,7 +47,8 @@ export default function List({ list, boardMembers, onBoardRefresh }) {
               key={card.id}
               card={card}
               boardMembers={boardMembers}
-              onUpdate={onBoardRefresh}
+              onCardUpdate={onCardUpdate}
+              onCardDelete={onCardDelete}
             />
           ))}
         </div>

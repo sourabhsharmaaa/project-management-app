@@ -27,9 +27,9 @@ export default function Board() {
   const handleCreateList = async (e) => {
     e.preventDefault()
     try {
-      await createList(id, { name: listName })
+      const newList = await createList(id, { name: listName })
       setListName('')
-      refresh()
+      setBoard(prev => ({ ...prev, lists: [...prev.lists, { ...newList, cards: [] }] }))
     } catch (err) {
       console.error('Failed to create list', err)
     }
@@ -45,6 +45,34 @@ export default function Board() {
     } catch (err) {
       console.error('Failed to add member', err)
     }
+  }
+
+  const handleListDelete = (listId) => {
+    setBoard(prev => ({ ...prev, lists: prev.lists.filter(l => l.id !== listId) }))
+  }
+
+  const handleCardCreate = (listId, card) => {
+    setBoard(prev => ({
+      ...prev,
+      lists: prev.lists.map(l => l.id === listId ? { ...l, cards: [...l.cards, card] } : l)
+    }))
+  }
+
+  const handleCardUpdate = (updatedCard) => {
+    setBoard(prev => ({
+      ...prev,
+      lists: prev.lists.map(l => ({
+        ...l,
+        cards: l.cards.map(c => c.id === updatedCard.id ? updatedCard : c)
+      }))
+    }))
+  }
+
+  const handleCardDelete = (cardId) => {
+    setBoard(prev => ({
+      ...prev,
+      lists: prev.lists.map(l => ({ ...l, cards: l.cards.filter(c => c.id !== cardId) }))
+    }))
   }
 
   const handleDragStart = ({ active }) => {
@@ -71,12 +99,8 @@ export default function Board() {
       setBoard(prev => ({
         ...prev,
         lists: prev.lists.map(l => {
-          if (l.id === draggedCard.boardListId) {
-            return { ...l, cards: l.cards.filter(c => c.id !== draggedCard.id) }
-          }
-          if (l.id === overListId) {
-            return { ...l, cards: [...l.cards, updated].sort((a, b) => a.position - b.position) }
-          }
+          if (l.id === draggedCard.boardListId) return { ...l, cards: l.cards.filter(c => c.id !== draggedCard.id) }
+          if (l.id === overListId) return { ...l, cards: [...l.cards, updated].sort((a, b) => a.position - b.position) }
           return l
         })
       }))
@@ -89,9 +113,7 @@ export default function Board() {
           if (l.id !== overListId) return l
           return {
             ...l,
-            cards: l.cards
-              .map(c => c.id === updated.id ? updated : c)
-              .sort((a, b) => a.position - b.position)
+            cards: l.cards.map(c => c.id === updated.id ? updated : c).sort((a, b) => a.position - b.position)
           }
         })
       }))
@@ -148,7 +170,10 @@ export default function Board() {
               key={list.id}
               list={list}
               boardMembers={board.members}
-              onBoardRefresh={refresh}
+              onListDelete={handleListDelete}
+              onCardCreate={handleCardCreate}
+              onCardUpdate={handleCardUpdate}
+              onCardDelete={handleCardDelete}
             />
           ))}
         </div>

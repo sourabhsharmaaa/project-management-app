@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { updateCard, assignUser, unassignUser, deleteCard } from '../api'
 import styles from './Card.module.css'
 
-export default function Card({ card, boardMembers, onUpdate }) {
+export default function Card({ card, boardMembers, onCardUpdate, onCardDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id })
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(card.name)
@@ -18,9 +18,9 @@ export default function Card({ card, boardMembers, onUpdate }) {
 
   const handleSave = async () => {
     try {
-      await updateCard(card.id, { name, description })
+      const updated = await updateCard(card.id, { name, description })
       setEditing(false)
-      onUpdate()
+      onCardUpdate(updated)
     } catch (err) {
       console.error('Failed to save card', err)
     }
@@ -30,12 +30,10 @@ export default function Card({ card, boardMembers, onUpdate }) {
     if (e.target.value === '') return
     const userId = parseInt(e.target.value)
     try {
-      if (!userId) {
-        await unassignUser(card.id)
-      } else {
-        await assignUser(card.id, { userId })
-      }
-      onUpdate()
+      const updated = userId
+        ? await assignUser(card.id, { userId })
+        : await unassignUser(card.id)
+      onCardUpdate(updated)
     } catch (err) {
       console.error('Failed to assign user', err)
     }
@@ -44,7 +42,7 @@ export default function Card({ card, boardMembers, onUpdate }) {
   const handleDelete = async () => {
     try {
       await deleteCard(card.id)
-      onUpdate()
+      onCardDelete(card.id)
     } catch (err) {
       console.error('Failed to delete card', err)
     }
