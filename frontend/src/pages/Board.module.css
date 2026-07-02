@@ -40,6 +40,12 @@
   min-width: 256px;
 }
 
+.dragOverlayDescription {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
 .listNameInput {
   width: 180px;
 }

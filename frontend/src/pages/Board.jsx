@@ -182,7 +182,7 @@ export default function Board() {
             <div className={styles.dragOverlayCard}>
               <div>{activeCard.name}</div>
               {activeCard.description && (
-                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{activeCard.description}</div>
+                <div className={styles.dragOverlayDescription}>{activeCard.description}</div>
               )}
             </div>
           ) : null}
