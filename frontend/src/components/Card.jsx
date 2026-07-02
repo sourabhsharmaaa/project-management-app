@@ -8,9 +8,9 @@ export default function Card({ card, boardMembers, onUpdate }) {
 
   const handleSave = async () => {
     try {
-      const updated = await updateCard(card.id, { name, description })
-      onUpdate(updated)
+      await updateCard(card.id, { name, description })
       setEditing(false)
+      onUpdate()
     } catch (err) {
       console.error('Failed to save card', err)
     }
@@ -21,12 +21,11 @@ export default function Card({ card, boardMembers, onUpdate }) {
     const userId = parseInt(e.target.value)
     try {
       if (!userId) {
-        const updated = await unassignUser(card.id)
-        onUpdate(updated)
+        await unassignUser(card.id)
       } else {
-        const updated = await assignUser(card.id, { userId })
-        onUpdate(updated)
+        await assignUser(card.id, { userId })
       }
+      onUpdate()
     } catch (err) {
       console.error('Failed to assign user', err)
     }
